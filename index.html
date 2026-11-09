@@ -696,14 +696,21 @@ svg.leaflet-image-layer.leaflet-interactive path {
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: var(--bg); color: var(--ink); }
-body { font-size: 15px; line-height: 1.45; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+body { font-size: 15px; line-height: 1.45; padding-top: env(safe-area-inset-top, 0px); -webkit-text-size-adjust: 100%; }
 button, select, input { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-.top { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--panel); }
-.top h1 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -.01em; }
-.top .period { color: var(--muted); font-size: 14px; }
-.top .actions { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.top { position: relative; z-index: 1500; flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--panel); }
+.top h1 { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.top .period { display: none; color: var(--muted); font-size: 14px; }
+.top .actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.btn-menu { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; }
+.tools { display: none; }
+.top.menu-open .tools { display: flex; flex-direction: column; align-items: stretch; gap: 12px; position: absolute; left: 0; right: 0; top: 100%; padding: 14px; background: var(--panel); border-bottom: 1px solid var(--line); box-shadow: var(--shadow); max-height: calc(100dvh - 120px); overflow: auto; }
+.top.menu-open .tools .actions { flex-direction: column; align-items: stretch; }
+.top.menu-open .tools .btn { min-height: 44px; text-align: left; }
+.top .live { font-size: 0; gap: 0; }
+.top .live::before { width: 10px; height: 10px; }
 .live { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); }
 .live::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
 .live.on::before { background: var(--ok); }
@@ -714,19 +721,34 @@ button, select, input { font: inherit; color: inherit; }
 .btn[disabled] { opacity: .55; cursor: progress; }
 .btn.small { padding: 3px 9px; font-size: 13px; }
 .status { font-size: 13px; color: var(--muted); max-width: 52ch; }
+.status:empty { display: none; }
+.top > .status { position: fixed; left: 10px; right: 10px; bottom: calc(66px + env(safe-area-inset-bottom, 0px)); z-index: 1800; max-width: none; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); padding: 10px 12px; cursor: pointer; }
 .status.err { color: var(--bad); }
 .status.ok { color: var(--ok); }
 .banner { margin: 0 0 12px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--bad); color: var(--ink); background: color-mix(in srgb, var(--bad) 8%, var(--panel)); font-size: 14px; }
 
-body { display: flex; flex-direction: column; height: 100vh; }
-.top { flex: none; }
-.layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(380px, 1fr); flex: 1; min-height: 0; }
-.mapcol { position: relative; border-right: 1px solid var(--line); min-height: 420px; }
+body { display: flex; flex-direction: column; height: 100vh; height: 100dvh; overflow: hidden; }
+.layout { position: relative; flex: 1; min-height: 0; }
+.mapcol, .panel { position: absolute; inset: 0; }
+.layout[data-view="map"] .panel { display: none; }
+.layout[data-view="panel"] .mapcol { visibility: hidden; }
 #map { position: absolute; inset: 0; background: var(--bg); }
-.panel { overflow-y: auto; padding: 16px 20px 40px; }
+.panel { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px 14px 32px; background: var(--bg); }
+.tabbar { flex: none; display: flex; background: var(--panel); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 1400; }
+.tabbar button { flex: 1; min-height: 52px; border: 0; background: none; font-weight: 600; font-size: 14px; color: var(--muted); border-top: 3px solid transparent; cursor: pointer; }
+.tabbar button[aria-selected="true"] { color: var(--accent); border-top-color: var(--accent); }
+.mapcard { left: 10px; right: 10px; bottom: 26px; padding: 10px 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; cursor: pointer; text-align: left; font: inherit; color: inherit; }
+.mapcard .mc-place { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 8px; font-weight: 700; font-size: 16px; }
+.mapcard .mc-place span { margin-left: auto; font-weight: 600; font-size: 13px; color: var(--accent); white-space: nowrap; }
+.mapcard .mc-k b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.mapcard .mc-k span { font-size: 12px; color: var(--muted); }
+.mapcard .mc-good b { color: var(--f-immatriculation); }
+.mapcard .mc-bad b { color: var(--f-collective); }
+.mapcol.sheet-open .mapcard { display: none; }
 
 .overlay { position: absolute; z-index: 500; background: var(--panel); border: 1px solid var(--line); border-radius: 8px; box-shadow: var(--shadow); font-size: 13px; }
-.statuses { top: 12px; left: 56px; padding: 8px 10px 10px; width: 250px; max-height: calc(100% - 24px); overflow: auto; }
+.statuses { left: 8px; right: 8px; bottom: 8px; padding: 10px 12px 12px; max-height: 58%; overflow: auto; z-index: 700; border-radius: 12px; }
+.statuses .fam { padding: 6px 4px; }
 .statuses h3 { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
 .statuses .tools { display: flex; gap: 6px; margin-top: 8px; }
 .fam { display: grid; grid-template-columns: 16px 1fr auto; align-items: center; gap: 8px; padding: 3px 4px; border-radius: 5px; cursor: pointer; user-select: none; }
@@ -738,9 +760,13 @@ body { display: flex; flex-direction: column; height: 100vh; }
 .fam input:focus-visible ~ .sw { outline: 2px solid var(--accent); outline-offset: 2px; }
 .fam .n { font-variant-numeric: tabular-nums; color: var(--muted); }
 .hint { margin-top: 8px; color: var(--muted); }
-.dom { top: 12px; right: 12px; padding: 6px 8px; display: flex; flex-direction: column; gap: 2px; }
-.dom span { color: var(--muted); font-size: 12px; padding: 0 4px; }
-.dom button { border: 0; background: none; text-align: left; padding: 3px 6px; border-radius: 4px; cursor: pointer; }
+.dom { top: 84px; right: 10px; padding: 6px 8px; }
+.dom summary { cursor: pointer; color: var(--muted); font-size: 13px; list-style: none; padding: 2px 4px; }
+.dom summary::-webkit-details-marker { display: none; }
+.dom summary::after { content: " ▾"; }
+.dom[open] summary::after { content: " ▴"; }
+.dom .dom-list { display: flex; flex-direction: column; gap: 2px; margin-top: 4px; }
+.dom button { border: 0; background: none; text-align: left; padding: 6px 6px; border-radius: 4px; cursor: pointer; }
 .dom button:hover { background: var(--soft); }
 .maploading { bottom: 24px; right: 12px; padding: 6px 10px; color: var(--muted); }
 .loading { position: fixed; inset: 0; z-index: 2000; display: grid; place-items: center; background: var(--bg); color: var(--muted); font-size: 16px; }
@@ -809,7 +835,11 @@ td a { color: var(--accent); }
   --s1: #f6e5de; --s2: #ecbfb1; --s3: #de927f; --s4: #c6604d; --s5: #983427; --nodata: #eef0ef; }
 @media (prefers-color-scheme: dark) { :root { --dn2: #e0705f; --dn1: #8f4a40; --d0: #2a3238; --dp1: #3f7a55; --dp2: #6cc08e;
   --s1: #3a2a27; --s2: #5e3a33; --s3: #8a4a3e; --s4: #bd6050; --s5: #ec8c78; --nodata: #1b242b; } }
-.indic { bottom: 24px; left: 12px; padding: 8px 10px; width: 270px; }
+.indic { top: 10px; right: 10px; padding: 6px; width: auto; max-width: calc(100% - 136px); }
+.indic h3 { display: none; }
+.indic .seg button { padding: 6px 6px; font-size: 12.5px; }
+@media (max-width: 899.98px) { .indic:not(.open) #ind-legend, .indic:not(.open) label.chk { display: none !important; } }
+.ind-more { display: block; width: 100%; margin-top: 4px; border: 0; background: none; color: var(--accent); font-size: 12.5px; cursor: pointer; padding: 2px; }
 .indic h3 { margin: 0 0 6px; font-size: 13px; font-weight: 600; }
 .seg { display: flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: 6px; }
 .seg button { flex: 1 1 auto; white-space: nowrap; border: 0; background: none; padding: 4px 5px; border-radius: 4px; cursor: pointer; color: var(--muted); font-size: 13px; }
@@ -829,7 +859,8 @@ td a { color: var(--accent); }
 .facet { margin: 0 0 18px; }
 .facet h4 { margin: 0 0 6px; font-size: 14px; font-weight: 600; }
 .picked { display: flex; gap: 8px; align-items: center; margin: 4px 0 8px; font-size: 13px; }
-dialog.guide { width: min(820px, calc(100vw - 32px)); max-height: calc(100vh - 48px); padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+dialog.guide, dialog.welcome { width: 100vw; max-width: 100vw; height: 100dvh; max-height: 100dvh; margin: 0; border-radius: 0 !important; }
+dialog.guide { width: 100vw; max-height: 100dvh; padding: 0; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
 dialog.guide::backdrop { background: rgba(10, 16, 22, .45); }
 .guide-head { position: sticky; top: 0; display: flex; align-items: center; gap: 12px; padding: 14px 20px; background: var(--panel); border-bottom: 1px solid var(--line); z-index: 1; }
 .guide-head h2 { margin: 0; font-size: 20px; }
@@ -850,7 +881,7 @@ dialog.guide::backdrop { background: rgba(10, 16, 22, .45); }
 .basemap a { color: var(--accent); }
 .bm-hint { color: var(--warn); }
 /* Accueil */
-dialog.welcome { width: min(900px, calc(100vw - 32px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
+dialog.welcome { width: 100vw; max-height: 100dvh; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); color: var(--ink); box-shadow: var(--shadow); }
 dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
 .w-body { padding: 22px 26px 18px; }
 .w-body h2 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.015em; }
@@ -884,13 +915,11 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
 .statuses .sh { display: flex; align-items: center; gap: 8px; margin: 0 0 6px; }
 .statuses .sh h3 { margin: 0; }
 .statuses .sh .btn { margin-left: auto; }
-.fam-show { top: 12px; left: 56px; padding: 6px 10px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
+.fam-show { top: 10px; left: 10px; padding: 8px 12px; min-height: 40px; cursor: pointer; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; }
 .fam-show .dots { display: inline-flex; gap: 2px; }
 .fam-show .dots i { width: 8px; height: 8px; border-radius: 50%; background: var(--c); display: block; }
-.panel-toggle { top: 50%; right: 0; transform: translateY(-50%); border-radius: 8px 0 0 8px; border-right: 0; padding: 10px 6px; cursor: pointer; writing-mode: vertical-rl; font-size: 13px; color: var(--ink); }
-.layout.panel-off { grid-template-columns: 1fr 0; }
-.layout.panel-off .panel { display: none; }
-.layout.panel-off .mapcol { border-right: 0; }
+.panel-toggle { display: none; top: 50%; right: 0; transform: translateY(-50%); border-radius: 8px 0 0 8px; border-right: 0; padding: 10px 6px; cursor: pointer; writing-mode: vertical-rl; font-size: 13px; color: var(--ink); }
+
 .tip { position: fixed; z-index: 3000; pointer-events: none; background: var(--panel); border: 1px solid var(--line); border-radius: 6px; box-shadow: var(--shadow); padding: 6px 9px; font-size: 13px; max-width: 300px; }
 .tip b { display: block; font-weight: 600; margin-bottom: 2px; }
 .tip .r { display: flex; align-items: center; gap: 6px; }
@@ -901,13 +930,90 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
 .leaflet-control-attribution { background: color-mix(in srgb, var(--panel) 85%, transparent) !important; color: var(--muted); }
 .leaflet-control-attribution a { color: var(--accent); }
 
-@media (max-width: 900px) {
-  body { display: block; height: auto; }
-  .layout { grid-template-columns: 1fr; height: auto; }
-  .mapcol { height: 65vh; border-right: 0; border-bottom: 1px solid var(--line); }
-  .panel { overflow: visible; }
-  .statuses { width: 200px; }
-  .hide-narrow { display: none; }
+/* Mobile : cibles tactiles et contenus resserrés */
+.place h2 { font-size: 22px; }
+.hk .v { font-size: 28px; }
+.health { grid-template-columns: 1fr 1fr; gap: 8px; }
+.hk { padding: 10px 12px; }
+.hk .t { font-size: 13px; }
+.hk .s, .hk .cmp { font-size: 12px; }
+.tiles { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+.filters { grid-template-columns: 1fr 1fr; }
+.filters select, select, .search { min-height: 40px; font-size: 16px; }
+.btn { min-height: 38px; }
+.btn.small { min-height: 34px; }
+.tabletools .search { max-width: none; flex: 1 1 100%; }
+.tablebox { max-height: 65vh; }
+.w-body { padding: 18px 16px 12px; }
+.w-body h2 { font-size: 22px; }
+.w-examples { grid-template-columns: 1fr; }
+.w-compose { flex-direction: column; align-items: stretch; }
+.w-compose select, .w-compose .btn { width: 100%; min-height: 44px; }
+.w-foot { padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); }
+.w-foot .btn { margin-left: 0; width: 100%; min-height: 44px; }
+.guide-head { padding: 12px 16px; }
+.guide-body { padding: 4px 16px 24px; }
+.hide-narrow { display: none; }
+.leaflet-control-zoom { display: none; }
+
+/* Grand écran */
+@media (min-width: 900px) {
+  .top { flex-wrap: wrap; gap: 10px 20px; padding: 12px 20px; }
+  .top h1 { font-size: 20px; }
+  .top .period { display: inline; }
+  .btn-menu { display: none; }
+  .tools, .top.menu-open .tools { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-left: auto; position: static; padding: 0; border: 0; box-shadow: none; background: none; max-height: none; overflow: visible; }
+  .top.menu-open .tools .actions { flex-direction: row; align-items: center; }
+  .top.menu-open .tools .btn { min-height: 0; }
+  .top .live { font-size: 13px; gap: 6px; }
+  .top .live::before { width: 8px; height: 8px; }
+  .top > .status { position: static; background: none; border: 0; box-shadow: none; padding: 0; max-width: 52ch; cursor: default; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(380px, 1fr); }
+  .mapcol, .panel { position: relative; inset: auto; }
+  .mapcol { border-right: 1px solid var(--line); min-height: 420px; }
+  .layout[data-view] .panel { display: block; }
+  .layout[data-view] .mapcol { visibility: visible; }
+  .layout.panel-off { grid-template-columns: 1fr 0; }
+  .layout.panel-off .panel { display: none; }
+  .layout.panel-off .mapcol { border-right: 0; }
+  .panel { padding: 16px 20px 40px; background: none; }
+  .tabbar, .mapcard { display: none !important; }
+  .statuses { top: 12px; left: 56px; right: auto; bottom: auto; width: 250px; max-height: calc(100% - 24px); padding: 8px 10px 10px; border-radius: 8px; }
+  .statuses .fam { padding: 3px 4px; }
+  .fam-show { top: 12px; left: 56px; min-height: 0; padding: 6px 10px; }
+  .dom { top: 12px; right: 12px; }
+  .indic { top: auto; right: auto; bottom: 24px; left: 12px; width: 270px; max-width: none; padding: 8px 10px; }
+  .indic h3 { display: block; }
+  .indic .seg button { padding: 4px 5px; font-size: 13px; }
+  .indic #ind-legend { display: block !important; }
+  .indic label.chk { display: flex !important; }
+  .ind-more { display: none; }
+  .panel-toggle { display: block; }
+  .place h2 { font-size: 26px; }
+  .hk .v { font-size: 34px; }
+  .health { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; }
+  .hk { padding: 12px 14px; }
+  .hk .t { font-size: 14px; }
+  .hk .s, .hk .cmp { font-size: 13px; }
+  .tiles { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .filters { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+  .filters select, select, .search { min-height: 0; font-size: 15px; }
+  .btn, .btn.small { min-height: 0; }
+  .tabletools .search { max-width: 300px; flex: 0 1 auto; }
+  .tablebox { max-height: 520px; }
+  dialog.guide { width: min(820px, calc(100vw - 32px)); height: auto; max-height: calc(100vh - 48px); margin: auto; border-radius: 10px !important; }
+  dialog.welcome { width: min(900px, calc(100vw - 32px)); height: auto; max-height: calc(100vh - 40px); margin: auto; border-radius: 12px !important; }
+  .w-body { padding: 22px 26px 18px; }
+  .w-body h2 { font-size: 26px; }
+  .w-examples { grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .w-compose { flex-direction: row; align-items: center; }
+  .w-compose select, .w-compose .btn { width: auto; min-height: 0; }
+  .w-foot { padding: 12px 26px; }
+  .w-foot .btn { margin-left: auto; width: auto; min-height: 0; }
+  .guide-head { padding: 14px 20px; }
+  .guide-body { padding: 4px 20px 24px; }
+  .hide-narrow { display: revert; }
+  .leaflet-control-zoom { display: block; }
 }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
 </style>
@@ -918,6 +1024,10 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
 <header class="top">
   <h1>Annonces BODACC en France</h1>
   <span class="period" id="period"></span>
+  <span class="live" id="live">Connexion au BODACC…</span>
+  <span class="status" id="status" role="status"></span>
+  <button class="btn btn-menu" id="btn-menu" type="button" aria-expanded="false" aria-controls="tools">Menu</button>
+  <div class="tools" id="tools">
   <div class="basemap" role="group" aria-label="Fond de carte">
     <label for="bm-kind">Fond de carte</label>
     <select id="bm-kind">
@@ -931,16 +1041,15 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
     <span class="bm-hint" id="bm-hint" hidden></span>
   </div>
   <div class="actions">
-    <span class="live" id="live">Connexion au BODACC…</span>
-    <span class="status" id="status" role="status"></span>
     <button class="btn" id="btn-welcome" type="button">Accueil</button>
     <button class="btn" id="btn-guide" type="button">Guide</button>
     <button class="btn" id="btn-update" type="button">Mettre à jour les cessions détaillées</button>
     <button class="btn" id="btn-rebuild" type="button" hidden>Actualiser la base complète</button>
   </div>
+  </div>
 </header>
 
-<main class="layout">
+<main class="layout" data-view="map">
   <section class="mapcol" aria-label="Carte">
     <div id="map"></div>
     <button class="overlay fam-show" id="fam-show" type="button" hidden aria-label="Afficher le menu des statuts"><span class="dots" id="fam-dots"></span>Statuts</button>
@@ -954,14 +1063,17 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
       </div>
       <div class="hint" id="map-hint"></div>
     </div>
-    <div class="overlay dom" aria-label="Outre-mer">
-      <span>Outre-mer</span>
-      <button type="button" data-dep="971">Guadeloupe</button>
-      <button type="button" data-dep="972">Martinique</button>
-      <button type="button" data-dep="973">Guyane</button>
-      <button type="button" data-dep="974">La Réunion</button>
-      <button type="button" data-dep="976">Mayotte</button>
-    </div>
+    <details class="overlay dom" id="dom">
+      <summary>Outre-mer</summary>
+      <div class="dom-list">
+        <button type="button" data-dep="971">Guadeloupe</button>
+        <button type="button" data-dep="972">Martinique</button>
+        <button type="button" data-dep="973">Guyane</button>
+        <button type="button" data-dep="974">La Réunion</button>
+        <button type="button" data-dep="976">Mayotte</button>
+      </div>
+    </details>
+    <button class="overlay mapcard" id="mapcard" type="button" aria-label="Voir l’analyse de la zone"></button>
     <div class="overlay indic" aria-label="Indicateur de dynamique">
       <h3>Couleur de la carte</h3>
       <div class="seg" role="group" aria-label="Indicateur">
@@ -971,6 +1083,7 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
       </div>
       <div id="ind-legend"></div>
       <label class="chk"><input type="checkbox" id="show-circles" checked> Afficher les cercles par statut</label>
+      <button class="ind-more" type="button" id="ind-more" aria-expanded="false">Légende</button>
     </div>
     <div class="overlay maploading" id="maploading" hidden>Interrogation du BODACC…</div>
   </section>
@@ -1106,6 +1219,10 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
     </div>
   </aside>
 </main>
+<nav class="tabbar" id="tabbar" aria-label="Vues">
+  <button type="button" data-view="map" aria-selected="true">Carte</button>
+  <button type="button" data-view="panel" aria-selected="false">Analyse</button>
+</nav>
 <div class="tip" id="tip" hidden></div>
 
 <dialog class="welcome" id="welcome" aria-labelledby="w-title">
@@ -1157,6 +1274,7 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
       <li>La fenêtre d’accueil propose des questions toutes prêtes (« Les défaillances d’entreprises dans le Gers »…) ou une question à composer : thème + territoire. Le bouton « Accueil » la rouvre ; une case permet de ne plus l’afficher au démarrage.</li>
       <li><b>Entreprises qui vont bien</b> : immatriculations et créations d’établissement. <b>Entreprises en difficulté</b> : procédures collectives, conciliations et rétablissements professionnels. Les deux sont rapportés à 10 000 habitants et comparés à la France ; un clic règle la carte sur le thème correspondant.</li>
       <li>Le bouton « Masquer » du menu des statuts le replie en une pastille ; le bouton sur le bord droit de la carte masque ou affiche le panneau. Ces réglages sont gardés d’une visite à l’autre.</li>
+      <li>Sur téléphone, la barre du bas bascule entre « Carte » et « Analyse » ; la carte affiche en bas les deux grands chiffres de la zone (touchez-les pour l’analyse). Le bouton « Menu » donne accès au fond de carte, au guide et aux mises à jour ; « Légende » déplie la légende des couleurs.</li>
     </ul>
 
     <h3 id="g-carte">Lire la carte</h3>
@@ -1509,7 +1627,8 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
 
   // ---------- Carte ----------
   const map = L.map('map', { zoomSnap: 0.25, minZoom: 3 });
-  const PAD = () => (innerWidth > 900 ? { paddingTopLeft: [280, 20], paddingBottomRight: [20, 20] } : { padding: [10, 10] });
+  const isWide = () => matchMedia('(min-width: 900px)').matches;
+  const PAD = () => (isWide() ? { paddingTopLeft: [280, 20], paddingBottomRight: [20, 20] } : { paddingTopLeft: [10, 60], paddingBottomRight: [10, 130] });
   const FR = L.latLngBounds([41.3, -5.2], [51.1, 9.6]);
   const home = (anim) => (anim ? map.flyToBounds(FR, { ...PAD(), duration: 0.6 }) : map.fitBounds(FR, PAD()));
   home(false);
@@ -1596,6 +1715,7 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
   };
   document.querySelectorAll('.seg button').forEach((b) => b.addEventListener('click', () => { S.ind = b.dataset.ind; computeBreaks(); drawIndLegend(); drawMap(); }));
   $('show-circles').addEventListener('change', (e) => { S.circles = e.target.checked; drawMap(); });
+  $('ind-more').addEventListener('click', () => { const box = document.querySelector('.indic'); const o = box.classList.toggle('open'); $('ind-more').textContent = o ? 'Fermer' : 'Légende'; $('ind-more').setAttribute('aria-expanded', String(o)); });
 
   const styleDeps = () => {
     depLayer.eachLayer((l) => {
@@ -1700,7 +1820,7 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
   };
   $('fam-all').addEventListener('click', () => { S.fams = new Set(FAMS.map((f) => f.i)); onFamsChange(); });
   $('fam-none').addEventListener('click', () => { S.fams = new Set(); onFamsChange(); });
-  const onFamsChange = () => { if (!$('statuses').hidden) { /* menu visible */ } else setStatuses(false); drawFams(PLACECOUNTS); drawMap(); drawLive(); loadList(true); drawCessions(); };
+  const onFamsChange = () => { if ($('statuses').hidden) setStatuses(false, true); drawFams(PLACECOUNTS); drawMap(); drawLive(); loadList(true); drawCessions(); };
 
   // ---------- Contrôles géographiques ----------
   const opt = (v, t) => { const o = document.createElement('option'); o.value = v; o.textContent = t; return o; };
@@ -1773,6 +1893,7 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
       const hit = el('rect', { class: o.onClick ? 'hit' : '', x: 0, y: -gap / 2, width: Wd, height: bh + gap, fill: 'transparent' }, g);
       hit.addEventListener('mousemove', (ev) => showTip(ev, o.tip(d)));
       hit.addEventListener('mouseleave', hideTip);
+      hit.addEventListener('pointerdown', (ev) => { if (ev.pointerType !== 'mouse' && !o.onClick) showTip(ev, o.tip(d)); });
       if (o.onClick) hit.addEventListener('click', () => { hideTip(); o.onClick(d); });
     });
   }
@@ -1803,6 +1924,7 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
       const hit = el('rect', { class: o.onClick ? 'hit' : '', x, y: 0, width: bw, height: H - 20, fill: 'transparent' }, svg);
       hit.addEventListener('mousemove', (ev) => showTip(ev, o.tip(d)));
       hit.addEventListener('mouseleave', hideTip);
+      hit.addEventListener('pointerdown', (ev) => { if (ev.pointerType !== 'mouse' && !o.onClick) showTip(ev, o.tip(d)); });
       if (o.onClick) hit.addEventListener('click', () => { hideTip(); o.onClick(d); });
     });
   }
@@ -1876,7 +1998,7 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
   const sumOf = (c, ids) => ids.reduce((s, i) => s + (c[i] || 0), 0);
   function drawHealth() {
     const box = $('health'), note = $('health-note');
-    if (LIVE === false || !PLACECOUNTS || !DEPAGG) { box.replaceChildren(); note.textContent = ''; box.hidden = LIVE === false; note.hidden = box.hidden; return; }
+    if (LIVE === false || !PLACECOUNTS || !DEPAGG) { box.replaceChildren(); note.textContent = ''; box.hidden = LIVE === false; note.hidden = box.hidden; $('mapcard').hidden = true; return; }
     box.hidden = false; note.hidden = false;
     const fr = new Array(NF).fill(0); DEPAGG.forEach((c) => c.forEach((n, f) => { fr[f] += n; }));
     const frPop = DEPS.reduce((s, d) => s + d.pop, 0);
@@ -1900,6 +2022,8 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
       card('good', 'Entreprises qui vont bien', GOOD, 'immatriculations et créations d’établissement', '--f-immatriculation'),
       card('bad', 'Entreprises en difficulté', BAD, 'procédures collectives, conciliations, rétablissements', '--f-collective'));
     const g = sumOf(PLACECOUNTS, GOOD), d = sumOf(PLACECOUNTS, BAD);
+    $('mapcard').innerHTML = `<span class="mc-place">${esc(placeName())}<span>Analyse ›</span></span><span class="mc-k mc-good"><b>${compact(g)}</b><span>vont bien</span></span><span class="mc-k mc-bad"><b>${compact(d)}</b><span>en difficulté</span></span>`;
+    $('mapcard').hidden = false;
     note.textContent = (g ? 'Pour 100 créations, ' + nf1.format(d / g * 100) + ' annonces de difficulté. ' : '') + 'Ces deux chiffres ne dépendent pas des statuts cochés ; cliquez dessus pour les explorer.';
   }
   function drawTiles() {
@@ -2447,7 +2571,8 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
     ['Immobilier', 'immobili|agence immobiliere|syndic|gestion locative|marchand de biens'],
   ].map(([nom, m]) => [SECT.indexOf(nom), new RegExp(m, 'i')]);
   const classe = (act) => { if (!act) return NC; const a = act.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); for (const [i, m] of FAMILLES) if (m.test(a)) return i; return NC; };
-  const status = (t, cls) => { const s = $('status'); s.textContent = t; s.className = 'status' + (cls ? ' ' + cls : ''); };
+  let stT = null;
+  const status = (t, cls) => { const s = $('status'); s.textContent = t; s.className = 'status' + (cls ? ' ' + cls : ''); clearTimeout(stT); if (t && cls !== 'err') stT = setTimeout(() => { if (!isWide()) s.textContent = ''; }, 7000); };
   const transforme = (r) => {
     let le = r.listeetablissements, texte = '';
     if (typeof le === 'string') { texte = le; try { le = JSON.parse(le); } catch (e) { le = {}; } } else texte = le ? JSON.stringify(le) : '';
@@ -2557,6 +2682,7 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
     if (th.tab) S.dtab = th.tab;
     PENDING_GO = th.go;
     setPanel(true);
+    if (!isWide()) setView('map');
     computeBreaks(); drawIndLegend();
     if (zone == null) { drawFams(PLACECOUNTS); drawMap(); drawLive(); loadList(true); drawCessions(); preloadAll(); goPending(); return; }
     if (zone.startsWith('d:')) { const d = DEPBY[zone.slice(2)]; if (d) { selectDep(d.i, true); return; } }
@@ -2593,14 +2719,26 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
   welcome.addEventListener('click', (e) => { if (e.target === welcome) welcome.close(); });
 
   // ---------- Volets repliables ----------
-  const setStatuses = (show) => {
+  const setStatuses = (show, keep) => {
     $('statuses').hidden = !show; $('fam-show').hidden = show;
+    document.querySelector('.mapcol').classList.toggle('sheet-open', show && !isWide());
     $('fam-dots').innerHTML = [...S.fams].sort((a, b) => a - b).slice(0, 6).map((i) => `<i style="--c:${famColor(i)}"></i>`).join('');
-    pref.set('statuts', show ? '' : 'non');
+    if (!keep && isWide()) pref.set('statuts', show ? '' : 'non');
   };
   $('fam-hide').addEventListener('click', () => setStatuses(false));
   $('fam-show').addEventListener('click', () => setStatuses(true));
+  function setView(v) {
+    const lay = document.querySelector('.layout');
+    lay.dataset.view = v;
+    document.querySelectorAll('#tabbar button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.view === v)));
+    hideTip();
+    if (v === 'map') setTimeout(() => map.invalidateSize(), 30);
+    else setTimeout(() => { drawLive(); drawCessions(); drawDetail(); drawMatrix(); }, 30);
+  }
+  document.querySelectorAll('#tabbar button').forEach((b) => b.addEventListener('click', () => setView(b.dataset.view)));
+  $('mapcard').addEventListener('click', () => setView('panel'));
   function setPanel(show) {
+    if (!isWide()) { if (show) setView('map'); return; }
     const lay = document.querySelector('.layout');
     const was = !lay.classList.contains('panel-off');
     lay.classList.toggle('panel-off', !show);
@@ -2609,6 +2747,16 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
     if (was !== show) setTimeout(() => { map.invalidateSize(); if (show) { drawLive(); drawCessions(); drawDetail(); } }, 60);
   }
   $('panel-toggle').addEventListener('click', () => setPanel(document.querySelector('.layout').classList.contains('panel-off')));
+
+  // ---------- Menu (petit écran) ----------
+  const top = document.querySelector('.top');
+  const setMenu = (open) => { top.classList.toggle('menu-open', open); $('btn-menu').setAttribute('aria-expanded', String(open)); $('btn-menu').textContent = open ? 'Fermer' : 'Menu'; };
+  $('btn-menu').addEventListener('click', (e) => { e.stopPropagation(); setMenu(!top.classList.contains('menu-open')); });
+  document.addEventListener('click', (e) => { if (!isWide() && top.classList.contains('menu-open') && !$('tools').contains(e.target)) setMenu(false); });
+  ['btn-welcome', 'btn-guide', 'btn-update', 'btn-rebuild'].forEach((id) => $(id).addEventListener('click', () => { if (!isWide()) setMenu(false); }));
+  $('status').addEventListener('click', () => { if (!isWide()) { $('status').textContent = ''; } });
+  document.querySelectorAll('.dom button').forEach((b) => b.addEventListener('click', () => { $('dom').open = false; }));
+  addEventListener('touchstart', (e) => { if (!e.target.closest('.chart')) hideTip(); }, { passive: true });
 
   // ---------- Guide ----------
   const guide = $('guide');
@@ -2632,11 +2780,15 @@ dialog.welcome::backdrop { background: rgba(10, 16, 22, .5); }
     if (RELAIS.reconstruction && RELAIS.reconstruction.en_cours) { $('btn-rebuild').disabled = true; pollRebuild(); }
   }
   $('loading').remove();
-  if (pref.get('statuts') === 'non') setStatuses(false);
-  if (pref.get('panneau') === 'non') setPanel(false);
+  if (!isWide() || pref.get('statuts') === 'non') setStatuses(false, true);
+  if (isWide() && pref.get('panneau') === 'non') setPanel(false);
   if (pref.get('accueil') !== 'non' && location.hash !== '#guide') setTimeout(openWelcome, 200);
   refresh(true);
-  let rt; addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { map.invalidateSize(); drawLive(); drawCessions(); }, 150); });
+  let rt, wasWide = isWide(); addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => {
+    const w = isWide();
+    if (w !== wasWide) { wasWide = w; setMenu(false); if (w) { document.querySelector('.mapcol').classList.remove('sheet-open'); setStatuses(pref.get('statuts') !== 'non', true); } else setStatuses(false, true); }
+    map.invalidateSize(); drawLive(); drawCessions(); drawDetail(); drawMatrix();
+  }, 150); });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { setBasemap(); drawFams(PLACECOUNTS); drawMap(); drawLive(); drawCessions(); styleDeps(); });
 })();
 </script>
